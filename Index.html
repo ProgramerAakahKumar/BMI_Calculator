@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #83a4d4, #b6fbff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s;
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+        input[type="number"], select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+            margin-top: 5px;
+        }
+        input[type="number"]:focus, select:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #007BFF;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Author and Help Icons */
+        .icon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #007BFF;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .icon.author {
+            top: 20px;
+            left: 20px;
+        }
+        .icon.help {
+            top: 20px;
+            right: 20px;
+        }
+        .icon i {
+            font-size: 24px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            width: 80%;
+            text-align: center;
+        }
+        .close {
+            cursor: pointer;
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            button {
+                font-size: 14px;
+            }
+            .icon {
+                width: 40px;
+                height: 40px;
+            }
+            .icon i {
+                font-size: 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>BMI Calculator</h1>
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" placeholder="Enter your weight" required>
+
+    <label for="height">Height:</label>
+    <input type="number" id="height" placeholder="Enter your height" required>
+    <select id="height-unit">
+        <option value="cm">Centimeters</option>
+        <option value="m">Meters</option>
+        <option value="ft">Feet</option>
+        <option value="in">Inches</option>
+    </select>
+
+    <button onclick="calculateBMI()">Calculate BMI</button>
+    <div class="result" id="result"></div>
+</div>
+
+<div class="icon author" onclick="openAuthorModal()">
+    <i class="fas fa-user"></i>
+</div>
+
+<div class="icon help" onclick="openHelpModal()">
+    <i class="fas fa-question-circle"></i>
+</div>
+
+<!-- Author Modal -->
+<div class="modal" id="authorModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAuthorModal()">&times;</span>
+        <h2>Aakash Kumar</h2>
+        <p>Web Developer and Designer</p>
+        <p>Email: aakash@example.com</p>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal" id="helpModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeHelpModal()">&times;</span>
+        <h2>BMI Information</h2>
+        <p><strong>What is BMI?</strong><br>Body Mass Index (BMI) is a measure of body fat based on height and weight.</p>
+        <p><strong>BMI Ranges:</strong><br>
+            Underweight: &lt; 18.5<br>
+            Normal weight: 18.5 – 24.9<br>
+            Overweight: 25 – 29.9<br>
+            Obesity: &gt;= 30
+        </p>
+    </div>
+</div>
+
+<script>
+    function calculateBMI() {
+        const weight = parseFloat(document.getElementById('weight').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const heightUnit = document.getElementById('height-unit').value;
+        const resultDiv = document.getElementById('result');
+
+        let heightInMeters;
+
+        // Convert height to meters
+        switch (heightUnit) {
+            case 'cm':
+                heightInMeters = height / 100;
+                break;
+            case 'm':
+                heightInMeters = height;
+                break;
+            case 'ft':
+                heightInMeters = height * 0.3048;
+                break;
+            case 'in':
+                heightInMeters = height * 0.0254;
+                break;
+            default:
+                heightInMeters = height; // Fallback (should not happen)
+        }
+
+        if (weight > 0 && heightInMeters > 0) {
+            const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
+            let category = '';
+
+            if (bmi < 18.5) {
+                category = 'Underweight';
+            } else if (bmi >= 18.5 && bmi < 24.9) {
+                category = 'Normal weight';
+            } else if (bmi >= 25 && bmi < 29.9) {
+                category = 'Overweight';
+            } else {
+                category = 'Obesity';
+            }
+
+            resultDiv.textContent = `Your BMI is ${bmi}. Category: ${category}`;
+            resultDiv.style.opacity = 1;
+        } else {
+            resultDiv.textContent = "Please enter valid weight and height.";
+            resultDiv.style.opacity = 1;
+        }
+    }
+
+    function openAuthorModal() {
+        document.getElementById('authorModal').style.display = 'flex';
+    }
+
+    function closeAuthorModal() {
+        document.getElementById('authorModal').style.display = 'none';
+    }
+
+    function openHelpModal() {
+        document.getElementById('helpModal').style.display = 'flex';
+    }
+
+    function closeHelpModal() {
+        document.getElementById('helpModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('authorModal')) {
+            closeAuthorModal();
+        } else if (event.target === document.getElementById('helpModal')) {
+            closeHelpModal();
+        }
+    }
+</script>
+
+</body>
+</html>
